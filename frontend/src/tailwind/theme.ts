@@ -8,7 +8,7 @@ export const themeColor = {
 export const themeSize = {
   xs: 'xs',
   sm: 'sm',
-  base: 'md',
+  md: 'md',
   lg: 'lg',
   xl: 'xl',
 }

@@ -4,18 +4,19 @@ import React from 'react'
 interface Props {
   id: string
   label?: string
-  val: string
+  val: number
   placeholder?: string
   errorMessage?: string
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   handleBlur?: React.FocusEventHandler<HTMLInputElement>
 }
 
-export const TextForm = (props: Props) => {
+export const NumberForm = (props: Props) => {
   const { id, label, val, placeholder, errorMessage, handleChange, handleBlur } = props
 
   return (
     <Input
+      type="number"
       key={id}
       id={id}
       color="blue"

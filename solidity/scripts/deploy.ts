@@ -1,17 +1,16 @@
-import { ethers } from "hardhat";
+import { ethers } from 'hardhat'
 
 async function main() {
-  const Todo = await ethers.getContractFactory("todo");
-  const todo = await Todo.deploy();
+  const Product = await ethers.getContractFactory('Product')
+  const product = await Product.deploy()
+  await product.deployed()
 
-  await todo.deployed();
-
-  console.log("Todo deployed to:", todo.address);
+  console.log('Product deployed to:', product.address)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+  console.error(error)
+  process.exitCode = 1
+})

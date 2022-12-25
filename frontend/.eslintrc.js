@@ -1,22 +1,22 @@
 module.exports = {
   env: {
     browser: true,
-    es2021: true
+    es2021: true,
   },
   extends: [
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
-    'prettier'
+    'prettier',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaFeatures: {
-      jsx: true
+      jsx: true,
     },
     ecmaVersion: '12',
     sourceType: 'module',
     tsconfigRootDir: __dirname,
-    project: ['./tsconfig.json']
+    project: ['./tsconfig.json'],
   },
   plugins: ['react', '@typescript-eslint', 'import', 'unused-imports'],
   ignorePatterns: ['.eslintrc.js'],
@@ -31,56 +31,45 @@ module.exports = {
     'import/order': [
       'warn',
       {
-        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+        groups: ['builtin', 'external', 'internal', ['parent', 'sibling'], 'object', 'type', 'index'],
         'newlines-between': 'always',
-        pathGroupsExcludedImportTypes: ['builtin'],
-        alphabetize: { order: 'asc', caseInsensitive: true }
-      }
+        alphabetize: { order: 'asc', caseInsensitive: true },
+      },
     ],
     'react/function-component-definition': [
       2,
       {
         namedComponents: 'arrow-function',
-        unnamedComponents: 'arrow-function'
-      }
+        unnamedComponents: 'arrow-function',
+      },
     ],
     'no-param-reassign': [2, { props: false }],
-    // 'import/extensions': [
-    //   'error',
-    //   {
-    //     js: 'never',
-    //     jsx: 'never',
-    //     ts: 'never',
-    //     tsx: 'never',
-    //     json: 'never',
-    //   },
-    // ],
     'import/no-unresolved': 'off',
     'react/jsx-filename-extension': [
       'error',
       {
-        extensions: ['.jsx', '.tsx']
-      }
+        extensions: ['.jsx', '.tsx'],
+      },
     ],
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
     'no-void': [
       'error',
       {
-        allowAsStatement: true
-      }
-    ]
+        allowAsStatement: true,
+      },
+    ],
   },
   settings: {
     'import/resolver': {
       alias: {
         map: [['@', './src']],
-        extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       },
       node: {
         paths: ['src'],
-        extensions: ['.js', '.jsx', '.ts', '.tsx', '.json']
-      }
-    }
-  }
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+      },
+    },
+  },
 }

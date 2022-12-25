@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.5",
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
     "hardhat": "^2.12.4",
     "prettier": "^2.8.0",
@@ -16,6 +17,7 @@
     "typechain": "^8.1.1"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.8.0",
     "@typechain/web3-v1": "^6.0.2"
   }
 }

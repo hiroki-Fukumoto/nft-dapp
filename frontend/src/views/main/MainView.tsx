@@ -1,4 +1,7 @@
-import { AppBar } from '@components/appBar/AppBar'
+import { NavBar } from '@components/navBar/NavBar'
+import { MainVM } from '@mainViews/MainVM'
+
+import { ErrorMessageAlert } from '@/components/alert/error/ErrorMessageAlert'
 
 interface Props {
   children: JSX.Element | JSX.Element[]
@@ -7,10 +10,19 @@ interface Props {
 export const MainView = (props: Props) => {
   const { children } = props
 
+  const VM = MainVM()
+
   return (
     <>
-      <AppBar />
-      <div className="p-2">{children}</div>
+      <NavBar />
+      <div className="container mx-auto p-2 relative">
+        <ErrorMessageAlert
+          show={VM.getShowErrorAlert()}
+          message={VM.getErrorMessageForAlert()}
+          onClose={VM.handleCloseErrorAlert}
+        />
+        {children}
+      </div>
     </>
   )
 }

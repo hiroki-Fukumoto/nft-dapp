@@ -8,5 +8,7 @@
     "strict": true,
     "skipLibCheck": true
   },
+  "exclude": ["node_modules"],
+  "include": ["./test", "./contracts", "./scripts"],
   "files": ["./hardhat.config.ts"]
 }
