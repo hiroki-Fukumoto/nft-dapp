@@ -1,4 +1,5 @@
 import { FilledButton, filledButtonStyle } from '@components/button/FilledButton'
+import { Icon, iconStyle } from '@components/icon/Icon'
 import { ProductResponse } from '@contracts/product/types'
 import { ProductCard } from '@mainViews/home/components/ProductCard'
 import { ProductCreateModal } from '@mainViews/home/components/ProductCreateModal'
@@ -19,6 +20,7 @@ export const HomeView = () => {
           onClose={VM.handleCloseErrorAlert}
         />
 
+        <Icon type={iconStyle.type.user} size={iconStyle.size.lg} />
         <div className="mb-3">
           <FilledButton color={filledButtonStyle.color.green} label="Create" onClick={VM.handleCreateProduct} />
         </div>
