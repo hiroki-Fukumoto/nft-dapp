@@ -15,7 +15,7 @@ export const MainView = (props: Props) => {
   return (
     <>
       <NavBar />
-      <div className="container mx-auto p-2 relative">
+      <div className="m-4 relative">
         <ErrorMessageAlert
           show={VM.getShowErrorAlert()}
           message={VM.getErrorMessageForAlert()}

@@ -1,10 +1,24 @@
 import { ProductABI } from '@contracts/product/productABI'
 import { CreateProductRequest, ProductResponse } from '@contracts/product/types'
+import { RecommendProduct } from '@mainViews/home/components/RecommendCarousel'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import { ROUTE } from '@/RouteConfig'
+// TODO
+export type UserRanking = {
+  rank: number
+  name: string
+  avatar_url: string
+  floor_price: number
+  total_volume: number
+}
 
 export const HomeVM = () => {
   const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
   const productABI = new ProductABI(contractAddress)
+
+  const navigate = useNavigate()
 
   const [products, setProducts] = useState([] as ProductResponse[])
   const [showCreateProductModal, setShowCreateProductModal] = useState(false)
@@ -16,18 +30,8 @@ export const HomeVM = () => {
   const [newProductErrorMessage, setNewProductErrorMessage] = useState('')
   const [errorMessageForAlert, setErrorMessageForAlert] = useState('')
   const [showErrorAlert, setShowErrorAlert] = useState(false)
-
-  // == state ==
-  const getProducts = () => products
-  const getShowCreateProductModal = () => showCreateProductModal
-  const getNewProductName = () => newProductName
-  const getNewProductImageURL = () => newProductImageURL
-  const getNewProductDescription = () => newProductDescription
-  const getNewProductPrice = () => newProductPrice
-  const getNewProductStock = () => newProductStock
-  const getNewProductErrorMessage = () => newProductErrorMessage
-  const getErrorMessageForAlert = () => errorMessageForAlert
-  const getShowErrorAlert = () => showErrorAlert
+  const [recommendProducts, setRecommendProducts] = useState([] as RecommendProduct[])
+  const [userRankings, setUserRankings] = useState([] as UserRanking[])
 
   // == ABI ==
   const getProductsABI = () => {
@@ -110,6 +114,137 @@ export const HomeVM = () => {
     setShowErrorAlert(false)
   }
 
+  const handleSelectUserRanking = () => {
+    navigate(ROUTE.collection)
+  }
+
+  // TODO
+  const getRecommendProducts = () => {
+    const p: RecommendProduct[] = [
+      {
+        id: '1',
+        name: 'product1',
+        floor: 0.1,
+        image_url: 'https://placeimg.com/640/480/animals/sepia',
+      },
+      {
+        id: '2',
+        name: 'product2',
+        floor: 0.2,
+        image_url: 'https://placeimg.com/640/480/animals',
+      },
+      {
+        id: '3',
+        name: 'product3',
+        floor: 0.3,
+        image_url: 'https://placeimg.com/640/480/arch',
+      },
+      {
+        id: '4',
+        name: 'product4',
+        floor: 0.4,
+        image_url: 'https://placeimg.com/640/480/nature',
+      },
+      {
+        id: '5',
+        name: 'product5',
+        floor: 0.5,
+        image_url: 'https://placeimg.com/640/480/people',
+      },
+      {
+        id: '6',
+        name: 'product6',
+        floor: 0.6,
+        image_url: 'https://placeimg.com/640/480/tech',
+      },
+      {
+        id: '7',
+        name: 'product7',
+        floor: 0.7,
+        image_url: 'https://placeimg.com/640/480/grayscale',
+      },
+    ]
+    setRecommendProducts(p)
+  }
+
+  // TODO
+  const getUserRankings = () => {
+    const users: UserRanking[] = [
+      {
+        rank: 1,
+        name: 'user1',
+        avatar_url: 'https://placeimg.com/640/480/people',
+        floor_price: 0.321,
+        total_volume: 100,
+      },
+      {
+        rank: 2,
+        name: 'user2',
+        avatar_url: 'https://placeimg.com/640/480/people',
+        floor_price: 0.321,
+        total_volume: 100,
+      },
+      {
+        rank: 3,
+        name: 'user3',
+        avatar_url: 'https://placeimg.com/640/480/people',
+        floor_price: 0.321,
+        total_volume: 100,
+      },
+      {
+        rank: 4,
+        name: 'user4',
+        avatar_url: 'https://placeimg.com/640/480/people',
+        floor_price: 0.321,
+        total_volume: 100,
+      },
+      {
+        rank: 5,
+        name: 'user5',
+        avatar_url: 'https://placeimg.com/640/480/people',
+        floor_price: 0.321,
+        total_volume: 100,
+      },
+      {
+        rank: 6,
+        name: 'user6',
+        avatar_url: 'https://placeimg.com/640/480/people',
+        floor_price: 0.321,
+        total_volume: 100,
+      },
+      {
+        rank: 7,
+        name: 'user7',
+        avatar_url: 'https://placeimg.com/640/480/people',
+        floor_price: 0.321,
+        total_volume: 100,
+      },
+      {
+        rank: 8,
+        name: 'user8',
+        avatar_url: 'https://placeimg.com/640/480/people',
+        floor_price: 0.321,
+        total_volume: 100,
+      },
+      {
+        rank: 9,
+        name: 'user9',
+        avatar_url: 'https://placeimg.com/640/480/people',
+        floor_price: 0.321,
+        total_volume: 100,
+      },
+      {
+        rank: 10,
+        name: 'user10',
+        avatar_url: 'https://placeimg.com/640/480/people',
+        floor_price: 0.321,
+        total_volume: 100,
+      },
+    ]
+
+    setUserRankings(users)
+  }
+
   // == init ==
   useEffect(() => {
     async function init() {
@@ -121,21 +256,27 @@ export const HomeVM = () => {
           setErrorMessageForAlert(e.message)
           setShowErrorAlert(true)
         })
+
+      // TODO
+      getRecommendProducts()
+      getUserRankings()
     }
     void init()
   }, [])
 
   return {
-    getProducts,
-    getShowCreateProductModal,
-    getNewProductName,
-    getNewProductImageURL,
-    getNewProductDescription,
-    getNewProductPrice,
-    getNewProductStock,
-    getNewProductErrorMessage,
-    getErrorMessageForAlert,
-    getShowErrorAlert,
+    products,
+    showCreateProductModal,
+    newProductName,
+    newProductImageURL,
+    newProductDescription,
+    newProductPrice,
+    newProductStock,
+    newProductErrorMessage,
+    errorMessageForAlert,
+    recommendProducts,
+    showErrorAlert,
+    userRankings,
     handleCreateProduct,
     handleCloseProductCreateModal,
     handleChangeNewProductName,
@@ -145,5 +286,6 @@ export const HomeVM = () => {
     handleChangeNewProductStock,
     handleCreateNewProduct,
     handleCloseErrorAlert,
+    handleSelectUserRanking,
   }
 }

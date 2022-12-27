@@ -1,3 +1,4 @@
+import { Avatar } from '@components/avatar/Avatar'
 import { Icon, iconStyle } from '@components/icon/Icon'
 import { Menu, MenuHandler, MenuItem, MenuList, Navbar, Typography } from '@material-tailwind/react'
 import { useState, useEffect } from 'react'
@@ -12,10 +13,6 @@ export const NavBar = () => {
 
   const handleOnSelectMenu = (route: string) => {
     navigate(route)
-  }
-
-  const handleOnSelectAccountMenu = () => {
-    setOpenNav(!openNav)
   }
 
   useEffect(() => {
@@ -37,8 +34,8 @@ export const NavBar = () => {
   )
 
   return (
-    <Navbar className="mx-auto max-w-screen-xl py-2 px-4 lg:px-8 lg:py-4" color="blue">
-      <div className="container mx-auto flex items-center justify-between text-blue-gray-900">
+    <Navbar className="py-2 px-4 !max-w-full" color="blue">
+      <div className="w-full flex items-center justify-between">
         <Typography
           as="div"
           href="#"
@@ -49,7 +46,7 @@ export const NavBar = () => {
           NFT
         </Typography>
         <div className="hidden lg:block">{navList}</div>
-        <div className="flex text-white">
+        <div className="flex text-white items-center">
           <div className="mr-4 cursor-pointer" onClick={() => handleOnSelectMenu(ROUTE.wallet)}>
             <Icon type={iconStyle.type.wallet} size={iconStyle.size.lg} />
           </div>
@@ -66,7 +63,7 @@ export const NavBar = () => {
             <Menu>
               <MenuHandler>
                 <div>
-                  <Icon type={iconStyle.type.user} size={iconStyle.size.lg} />
+                  <Avatar imageURL="https://placeimg.com/640/480/people" />
                 </div>
               </MenuHandler>
               <MenuList>

@@ -24,5 +24,6 @@ export interface Props {
   color?: Color
   size?: Size
   label: string
+  className?: string
   onClick: (e: React.MouseEvent<HTMLElement>) => void
 }

@@ -1,17 +1,18 @@
 // SEE: https://fontawesome.com/icons
 
 import { SizeProp } from '@fortawesome/fontawesome-svg-core'
-import { faUser, faWallet, faCartShopping } from '@fortawesome/free-solid-svg-icons'
+import { faWallet, faCartShopping, faAngleRight, faAngleLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { themeSize } from '@/tailwind/theme'
 
 const ICON_TYPE = {
-  user: faUser,
   wallet: faWallet,
   cart: faCartShopping,
+  arrowRight: faAngleRight,
+  arrowLeft: faAngleLeft,
 } as const
-type IconType = typeof ICON_TYPE[keyof typeof ICON_TYPE]
+export type IconType = typeof ICON_TYPE[keyof typeof ICON_TYPE]
 
 const SIZE = {
   sm: themeSize.sm as SizeProp,
