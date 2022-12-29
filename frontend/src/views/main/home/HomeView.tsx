@@ -1,10 +1,9 @@
-import { ProductCreateModal } from '@mainViews/home/components/ProductCreateModal'
-import { RecommendCarousel } from '@mainViews/home/components/RecommendCarousel'
-import { HomeVM } from '@mainViews/home/HomeVM'
-import { MainView } from '@mainViews/MainView'
-
 import { ErrorMessageAlert } from '@/components/alert/error/ErrorMessageAlert'
+import { ProductCreateModal } from '@/views/main/home/components/ProductCreateModal'
+import { RecommendCarousel } from '@/views/main/home/components/RecommendCarousel'
 import { UserRanking } from '@/views/main/home/components/UserRanking'
+import { HomeVM } from '@/views/main/home/HomeVM'
+import { MainView } from '@/views/main/MainView'
 
 export const HomeView = () => {
   const VM = HomeVM()
@@ -44,13 +43,11 @@ export const HomeView = () => {
         imageURL={VM.newProductImageURL}
         description={VM.newProductDescription}
         price={VM.newProductPrice}
-        stock={VM.newProductStock}
         errorMessage={VM.newProductErrorMessage}
         handleChangeName={VM.handleChangeNewProductName}
         handleChangeImageURL={VM.handleChangeNewProductImageURL}
         handleChangeDescription={VM.handleChangeNewProductDescription}
         handleChangePrice={VM.handleChangeNewProductPrice}
-        handleChangeStock={VM.handleChangeNewProductStock}
         onClose={VM.handleCloseProductCreateModal}
         onCreate={VM.handleCreateNewProduct}
       />

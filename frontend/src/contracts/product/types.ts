@@ -4,7 +4,6 @@ export type ProductResponse = {
   image_url: string
   description: string
   price: number
-  stock: number
   timestamp: string
 }
 
@@ -13,5 +12,4 @@ export type CreateProductRequest = {
   image_url: string
   description: string
   price: number
-  stock: number
 }

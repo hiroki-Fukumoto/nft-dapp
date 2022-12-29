@@ -1,7 +1,8 @@
 // TODO: If other components need to use it, make it common.
-import { RoundedIconButton } from '@components/button/RoundedIconButton'
-import { iconStyle } from '@components/icon/Icon'
 import { useState, useRef, useEffect } from 'react'
+
+import { RoundedIconButton } from '@/components/button/RoundedIconButton'
+import { iconStyle } from '@/components/icon/Icon'
 
 export type RecommendProduct = {
   id: string

@@ -1,10 +1,10 @@
-import { ProductABI } from '@contracts/product/productABI'
-import { CreateProductRequest, ProductResponse } from '@contracts/product/types'
-import { RecommendProduct } from '@mainViews/home/components/RecommendCarousel'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { ProductABI } from '@/contracts/product/productABI'
+import { CreateProductRequest, ProductResponse } from '@/contracts/product/types'
 import { ROUTE } from '@/RouteConfig'
+import { RecommendProduct } from '@/views/main/home/components/RecommendCarousel'
 // TODO
 export type UserRanking = {
   rank: number
@@ -26,7 +26,6 @@ export const HomeVM = () => {
   const [newProductImageURL, setNewProductImageURL] = useState('')
   const [newProductDescription, setNewProductDescription] = useState('')
   const [newProductPrice, setNewProductPrice] = useState(0)
-  const [newProductStock, setNewProductStock] = useState(0)
   const [newProductErrorMessage, setNewProductErrorMessage] = useState('')
   const [errorMessageForAlert, setErrorMessageForAlert] = useState('')
   const [showErrorAlert, setShowErrorAlert] = useState(false)
@@ -51,7 +50,6 @@ export const HomeVM = () => {
       image_url: newProductImageURL,
       description: newProductDescription,
       price: newProductPrice,
-      stock: newProductStock,
     }
     return productABI.createProduct(req)
   }
@@ -67,7 +65,6 @@ export const HomeVM = () => {
     setNewProductImageURL('')
     setNewProductDescription('')
     setNewProductPrice(0)
-    setNewProductStock(0)
   }
 
   const handleChangeNewProductName = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,10 +81,6 @@ export const HomeVM = () => {
 
   const handleChangeNewProductPrice = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewProductPrice(Number(event.target.value))
-  }
-
-  const handleChangeNewProductStock = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewProductStock(Number(event.target.value))
   }
 
   const handleCreateNewProduct = () => {
@@ -271,7 +264,6 @@ export const HomeVM = () => {
     newProductImageURL,
     newProductDescription,
     newProductPrice,
-    newProductStock,
     newProductErrorMessage,
     errorMessageForAlert,
     recommendProducts,
@@ -283,7 +275,6 @@ export const HomeVM = () => {
     handleChangeNewProductImageURL,
     handleChangeNewProductDescription,
     handleChangeNewProductPrice,
-    handleChangeNewProductStock,
     handleCreateNewProduct,
     handleCloseErrorAlert,
     handleSelectUserRanking,

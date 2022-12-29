@@ -1,6 +1,7 @@
-import { BaseCard } from '@components/card/BaseCard'
-import { Product } from '@mainViews/collection/CollectionVM'
 import { CardBody, CardHeader } from '@material-tailwind/react'
+
+import { BaseCard } from '@/components/card/BaseCard'
+import { Product } from '@/views/main/collection/CollectionVM'
 
 interface Props {
   product: Product

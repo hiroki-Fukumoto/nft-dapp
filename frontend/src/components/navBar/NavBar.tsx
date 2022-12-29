@@ -1,14 +1,17 @@
-import { Avatar } from '@components/avatar/Avatar'
-import { Icon, iconStyle } from '@components/icon/Icon'
 import { Menu, MenuHandler, MenuItem, MenuList, Navbar, Typography } from '@material-tailwind/react'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useRecoilState } from 'recoil'
 
+import { Avatar } from '@/components/avatar/Avatar'
+import { Icon, iconStyle } from '@/components/icon/Icon'
 import { ROUTE } from '@/RouteConfig'
+import { accountState } from '@/store/userState'
 
 export const NavBar = () => {
   const navigate = useNavigate()
 
+  const [account] = useRecoilState(accountState)
   const [openNav, setOpenNav] = useState(false)
 
   const handleOnSelectMenu = (route: string) => {
@@ -63,13 +66,15 @@ export const NavBar = () => {
             <Menu>
               <MenuHandler>
                 <div>
-                  <Avatar imageURL="https://placeimg.com/640/480/people" />
+                  <Avatar
+                    imageURL={
+                      account.avatar_image_url != '' ? account.avatar_image_url : 'https://placehold.jp/150x150.png'
+                    }
+                  />
                 </div>
               </MenuHandler>
               <MenuList>
-                <MenuItem>Profile</MenuItem>
-                <MenuItem>xxxx</MenuItem>
-                <MenuItem>Sign out</MenuItem>
+                <MenuItem onClick={() => handleOnSelectMenu(ROUTE.profile)}>Profile</MenuItem>
               </MenuList>
             </Menu>
           </div>

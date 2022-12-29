@@ -12,9 +12,9 @@ deploy:
 clean:
 	npx hardhat clean
 
-f=
+run=
 testing:
-	REPORT_GAS=true npx hardhat test ./test/${f}.ts
+	REPORT_GAS=true npx hardhat test ./test/${run}.ts
 
 testing-all:
 	REPORT_GAS=true npx hardhat test

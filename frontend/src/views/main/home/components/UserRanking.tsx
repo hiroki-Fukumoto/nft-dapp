@@ -1,5 +1,5 @@
 // TODO
-import { UserRanking as TUserRanking } from '@mainViews/home/HomeVM'
+import { UserRanking as TUserRanking } from '@/views/main/home/HomeVM'
 
 interface Props {
   rankings: TUserRanking[]

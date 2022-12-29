@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-// NOTE: error -> Source "@openzeppelin/contracts/utils/math/SafeMath.sol" not found: File import callback not supported
-// import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
 contract Product {
     address public owner;
     ProductStruct[] products;
@@ -19,7 +16,6 @@ contract Product {
         string imageURL;
         string description;
         uint8 price;
-        uint8 stock;
         bool isDeleted;
         uint timestamp;
     }
@@ -29,7 +25,6 @@ contract Product {
         string imageURL;
         string description;
         uint8 price;
-        uint8 stock;
     }
 
     struct ProductResponse {
@@ -38,7 +33,6 @@ contract Product {
         string imageURL;
         string description;
         uint8 price;
-        uint8 stock;
         uint timestamp;
     }
 
@@ -57,10 +51,10 @@ contract Product {
         // TODO: URL check
         require(bytes(req.imageURL).length > 0, "image URL cannot be empty");
         require(req.price > 0, "price cannot be zero");
-        require(req.stock > 0, "stock cannot be zero");
         _;
     }
 
+    // == method ==
     function getProductIDs() public view returns (uint[] memory) {
         if (ownerProductCount[msg.sender] == 0) {
             uint[] memory emptyArray = new uint[](0);
@@ -89,7 +83,6 @@ contract Product {
             p.imageURL,
             p.description,
             p.price,
-            p.stock,
             p.timestamp
         );
         return res;
@@ -105,17 +98,18 @@ contract Product {
                 _req.imageURL,
                 _req.description,
                 _req.price,
-                _req.stock,
                 false,
                 block.timestamp
             )
         );
 
-        uint id = products.length - 1;
+        uint id = products.length;
         productExist[id] = true;
         productToOwner[id] = msg.sender;
         ownerProductCount[msg.sender]++;
 
         return id;
     }
+
+    // TODO: update, delete
 }

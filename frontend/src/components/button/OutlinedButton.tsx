@@ -1,5 +1,6 @@
-import { Props } from '@components/button/index'
 import { Button } from '@material-tailwind/react'
+
+import { Props } from '@/components/button/index'
 
 export const OutlinedButton = (props: Props) => {
   const { color, size, label, onClick } = props

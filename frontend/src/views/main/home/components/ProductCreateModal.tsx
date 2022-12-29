@@ -1,11 +1,12 @@
-import { FilledButton } from '@components/button/FilledButton'
-import { buttonStyle } from '@components/button/index'
-import { OutlinedButton } from '@components/button/OutlinedButton'
-import { TitledDialog } from '@components/dialog/TitledDialog'
-import { NumberForm } from '@components/form/NumberForm'
-import { TextAreaForm } from '@components/form/TextAreaForm'
-import { TextForm } from '@components/form/TextForm'
 import { DialogBody, DialogFooter } from '@material-tailwind/react'
+
+import { FilledButton } from '@/components/button/FilledButton'
+import { buttonStyle } from '@/components/button/index'
+import { OutlinedButton } from '@/components/button/OutlinedButton'
+import { TitledDialog } from '@/components/dialog/TitledDialog'
+import { NumberForm } from '@/components/form/NumberForm'
+import { TextAreaForm } from '@/components/form/TextAreaForm'
+import { TextForm } from '@/components/form/TextForm'
 
 interface Props {
   show: boolean
@@ -13,13 +14,11 @@ interface Props {
   imageURL: string
   description: string
   price: number
-  stock: number
   errorMessage: string
   handleChangeName: (e: React.ChangeEvent<HTMLInputElement>) => void
   handleChangeImageURL: (e: React.ChangeEvent<HTMLInputElement>) => void
   handleChangeDescription: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
   handleChangePrice: (e: React.ChangeEvent<HTMLInputElement>) => void
-  handleChangeStock: (e: React.ChangeEvent<HTMLInputElement>) => void
   onClose: () => void
   onCreate: (e: React.MouseEvent<HTMLElement>) => void
 }
@@ -31,13 +30,11 @@ export const ProductCreateModal = (props: Props) => {
     imageURL,
     description,
     price,
-    stock,
     errorMessage,
     handleChangeName,
     handleChangeImageURL,
     handleChangeDescription,
     handleChangePrice,
-    handleChangeStock,
     onClose,
     onCreate,
   } = props
@@ -70,7 +67,6 @@ export const ProductCreateModal = (props: Props) => {
           <div className="mb-3">
             <NumberForm id="price" label="Price(ETH)" val={price} handleChange={handleChangePrice} />
           </div>
-          <NumberForm id="stock" label="Stock" val={stock} handleChange={handleChangeStock} />
         </div>
       </DialogBody>
       <DialogFooter>

@@ -1,5 +1,6 @@
-import { BaseDialog } from '@components/dialog/BaseDialog'
 import { DialogHeader } from '@material-tailwind/react'
+
+import { BaseDialog } from '@/components/dialog/BaseDialog'
 
 interface Props {
   show: boolean

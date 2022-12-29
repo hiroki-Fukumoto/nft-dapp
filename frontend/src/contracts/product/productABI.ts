@@ -1,9 +1,9 @@
-import { CreateProductRequest, ProductResponse } from '@contracts/product/types'
 import productContract from 'solidity/artifacts/contracts/Product.sol/Product.json'
 import { Product as TProduct } from 'solidity/types/web3-v1-contracts/Product'
 import Web3 from 'web3'
 import { AbiItem } from 'web3-utils'
 
+import { CreateProductRequest, ProductResponse } from '@/contracts/product/types'
 import { Web3Factory } from '@/web3/index'
 
 export class ProductABI {
@@ -54,8 +54,7 @@ export class ProductABI {
           image_url: p[2],
           description: p[3],
           price: Number(p[4]),
-          stock: Number(p[5]),
-          timestamp: p[6],
+          timestamp: p[5],
         }
         return product
       })
@@ -66,7 +65,7 @@ export class ProductABI {
 
   createProduct(request: CreateProductRequest) {
     return this.contract()
-      .methods.createProduct([request.name, request.image_url, request.description, request.price, request.stock])
+      .methods.createProduct([request.name, request.image_url, request.description, request.price])
       .send({ from: this.account })
       .catch((e: Error) => {
         throw e

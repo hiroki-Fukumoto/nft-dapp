@@ -1,6 +1,7 @@
-import { Icon, IconType } from '@components/icon/Icon'
 import { IconButton as IB } from '@material-tailwind/react'
 import { size as Size, color as Color } from '@material-tailwind/react/types/components/button'
+
+import { Icon, IconType } from '@/components/icon/Icon'
 
 interface Props {
   color?: Color

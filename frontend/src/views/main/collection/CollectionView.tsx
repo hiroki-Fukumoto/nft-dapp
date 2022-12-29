@@ -1,6 +1,6 @@
-import { CollectionVM, Product } from '@mainViews/collection/CollectionVM'
-import { ProductCard } from '@mainViews/collection/components/ProductCard'
-import { MainView } from '@mainViews/MainView'
+import { CollectionVM, Product } from '@/views/main/collection/CollectionVM'
+import { ProductCard } from '@/views/main/collection/components/ProductCard'
+import { MainView } from '@/views/main/MainView'
 
 export const CollectionView = () => {
   const VM = CollectionVM()
