@@ -20,3 +20,7 @@ export type CreateAccountRequest = {
   header_image_url: string
   avatar_image_url: string
 }
+
+export type UpdateAccountRequest = CreateAccountRequest & {
+  id: string
+}

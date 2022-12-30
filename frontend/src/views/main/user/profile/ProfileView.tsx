@@ -1,6 +1,7 @@
 import { CardBody } from '@material-tailwind/react'
 
 import { ErrorMessageAlert } from '@/components/alert/error/ErrorMessageAlert'
+import { SuccessMessageAlert } from '@/components/alert/success/SuccessMessageAlert'
 import { FilledButton } from '@/components/button/FilledButton'
 import { BaseCard } from '@/components/card/BaseCard'
 import { EmailForm } from '@/components/form/EmailForm'
@@ -17,6 +18,11 @@ export const ProfileView = () => {
         show={VM.showErrorAlert}
         message={VM.errorMessageForAlert}
         onClose={VM.handleCloseErrorAlert}
+      />
+      <SuccessMessageAlert
+        show={VM.showSuccessAlert}
+        message={VM.successMessageForAlert}
+        onClose={VM.handleCloseSuccessAlert}
       />
 
       <div className="w-1/2 mx-auto">

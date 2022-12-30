@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRecoilState } from 'recoil'
 
-import { CreateAccountRequest } from '@/contracts/user/types'
+import { CreateAccountRequest, UpdateAccountRequest } from '@/contracts/user/types'
 import { UserABI } from '@/contracts/user/userABI'
 import { accountState } from '@/store/userState'
 
@@ -18,6 +18,8 @@ export const ProfileVM = () => {
   const [errorMessage, setErrorMessage] = useState('')
   const [showErrorAlert, setShowErrorAlert] = useState(false)
   const [errorMessageForAlert, setErrorMessageForAlert] = useState('')
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false)
+  const [successMessageForAlert, setSuccessMessageForAlert] = useState('')
 
   // == ABI ==
   const getMe = () => {
@@ -45,6 +47,20 @@ export const ProfileVM = () => {
     })
   }
 
+  const updateAccountABI = () => {
+    const req: UpdateAccountRequest = {
+      id: account.id,
+      name,
+      bio,
+      email,
+      header_image_url: headerImageURL,
+      avatar_image_url: avatarImageURL,
+    }
+    return userABI.updateAccount(req).catch((e: Error) => {
+      throw e
+    })
+  }
+
   // == methods ==
   const handleChangeName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value)
@@ -68,14 +84,35 @@ export const ProfileVM = () => {
 
   const handleSave = () => {
     setErrorMessage('')
-    void createAccountABI().catch((e: Error) => {
-      setErrorMessage(e.message)
-    })
+    if (account.id == '') {
+      void createAccountABI()
+        .then(() => {
+          setShowSuccessAlert(true)
+          setSuccessMessageForAlert('Created Account')
+        })
+        .catch((e: Error) => {
+          setErrorMessage(e.message)
+        })
+    } else {
+      void updateAccountABI()
+        .then(() => {
+          setShowSuccessAlert(true)
+          setSuccessMessageForAlert('Updated Account')
+        })
+        .catch((e: Error) => {
+          setErrorMessage(e.message)
+        })
+    }
   }
 
   const handleCloseErrorAlert = () => {
     setErrorMessageForAlert('')
     setShowErrorAlert(false)
+  }
+
+  const handleCloseSuccessAlert = () => {
+    setSuccessMessageForAlert('')
+    setShowSuccessAlert(false)
   }
 
   useEffect(() => {
@@ -115,6 +152,8 @@ export const ProfileVM = () => {
     errorMessage,
     showErrorAlert,
     errorMessageForAlert,
+    showSuccessAlert,
+    successMessageForAlert,
     handleChangeName,
     handleChangeBio,
     handleChangeEmail,
@@ -122,5 +161,6 @@ export const ProfileVM = () => {
     handleChangeAvatarImageURL,
     handleSave,
     handleCloseErrorAlert,
+    handleCloseSuccessAlert,
   }
 }

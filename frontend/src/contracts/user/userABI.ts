@@ -3,7 +3,7 @@ import { User as TUser } from 'solidity/types/web3-v1-contracts/User'
 import Web3 from 'web3'
 import { AbiItem } from 'web3-utils'
 
-import { CreateAccountRequest, AccountResponse, MeResponse } from '@/contracts/user/types'
+import { CreateAccountRequest, AccountResponse, MeResponse, UpdateAccountRequest } from '@/contracts/user/types'
 import { Web3Factory } from '@/web3/index'
 
 export class UserABI {
@@ -24,6 +24,7 @@ export class UserABI {
   }
 
   async createAccount(req: CreateAccountRequest) {
+    // TODO
     if (!this.account) {
       await this.web3Factory.getDefaultAccount().then((res) => {
         this.account = res
@@ -35,6 +36,15 @@ export class UserABI {
     return this.contract()
       .methods.createAccount([req.name, req.bio, req.email, req.header_image_url, req.avatar_image_url])
       .send({ from: this.account, value: fee })
+      .catch((e: Error) => {
+        throw e
+      })
+  }
+
+  updateAccount(req: UpdateAccountRequest) {
+    return this.contract()
+      .methods.updateAccount([req.id, req.name, req.bio, req.email, req.header_image_url, req.avatar_image_url])
+      .send({ from: this.account })
       .catch((e: Error) => {
         throw e
       })
