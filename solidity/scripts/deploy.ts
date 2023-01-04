@@ -4,7 +4,7 @@ async function main() {
   const fee = ethers.utils.parseEther('0.002')
 
   const Product = await ethers.getContractFactory('Product')
-  const product = await Product.deploy()
+  const product = await Product.deploy(fee)
   await product.deployed()
 
   const User = await ethers.getContractFactory('User')
@@ -12,7 +12,7 @@ async function main() {
   await user.deployed()
 
   const ProductStats = await ethers.getContractFactory('ProductStats')
-  const productStats = await ProductStats.deploy(fee)
+  const productStats = await ProductStats.deploy()
   await productStats.deployed()
 
   console.log('Product deployed to:', product.address)
