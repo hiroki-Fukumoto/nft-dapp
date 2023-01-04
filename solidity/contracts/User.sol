@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-contract User {
+import "./ProductStats.sol";
+
+contract User is ProductStats {
     address public owner;
     uint public fee;
-    Account[] accounts;
+    AccountStruct[] accounts;
 
     constructor(uint _fee) {
         owner = msg.sender;
@@ -12,7 +14,7 @@ contract User {
     }
 
     // == struct ==
-    struct Account {
+    struct AccountStruct {
         address creater;
         string name;
         string bio;
@@ -21,12 +23,6 @@ contract User {
         string avatarImageURL;
         bool isDeleted;
         uint timestamp;
-    }
-
-    struct AccountStats {
-        uint productCount;
-        uint8 floorPrice;
-        uint8 totalVolume;
     }
 
     struct CreateAccountRequest {
@@ -72,7 +68,6 @@ contract User {
     // == mapping ==
     mapping(uint => address) public ownerOf;
     mapping(uint => bool) accountExist;
-    mapping(address => AccountStats) public statsOf;
 
     // == modifier ==
     modifier validateCreateAccount(CreateAccountRequest memory _req) {
@@ -138,7 +133,7 @@ contract User {
     function createAccount(
         CreateAccountRequest memory _req
     ) public payable validateCreateAccount(_req) returns (bool) {
-        Account memory account;
+        AccountStruct memory account;
         account.creater = msg.sender;
         account.name = _req.name;
         account.bio = _req.bio;
@@ -148,8 +143,8 @@ contract User {
         account.timestamp = block.timestamp;
         accounts.push(account);
 
-        statsOf[msg.sender].floorPrice = 0;
-        statsOf[msg.sender].totalVolume = 0;
+        productStatsOf[msg.sender].floorPrice = 0;
+        productStatsOf[msg.sender].totalVolume = 0;
 
         uint id = accounts.length - 1;
         accountExist[id] = true;
@@ -161,7 +156,7 @@ contract User {
     function updateAccount(
         UpdateAccountRequest memory _req
     ) public validateUpdateAccount(_req) returns (bool) {
-        Account memory account = accounts[_req.id];
+        AccountStruct memory account = accounts[_req.id];
         account.name = _req.name;
         account.bio = _req.bio;
         account.email = _req.email;
@@ -176,9 +171,9 @@ contract User {
         require(ownerOf[_id] == msg.sender, "Unauthorize Personal");
         require(accountExist[_id], "Account not found");
 
-        Account memory a = accounts[_id];
-        a.isDeleted = true;
-        accounts[_id] = a;
+        AccountStruct memory account = accounts[_id];
+        account.isDeleted = true;
+        accounts[_id] = account;
 
         return true;
     }
@@ -195,16 +190,8 @@ contract User {
         uint counter = 0;
         for (uint i = 0; i < accounts.length; i++) {
             if (!accounts[i].isDeleted) {
-                Account memory account = accounts[i];
-                AccountResponse memory a;
-                a.id = i;
-                a.name = account.name;
-                a.bio = account.bio;
-                a.headerImageURL = account.headerImageURL;
-                a.avatarImageURL = account.avatarImageURL;
-                a.floorPrice = statsOf[msg.sender].floorPrice;
-                a.totalVolume = statsOf[msg.sender].totalVolume;
-                a.timestamp = account.timestamp;
+                AccountStruct memory account = accounts[i];
+                AccountResponse memory a = _parseAccountResponse(i, account);
                 results[counter] = a;
                 counter++;
             }
@@ -216,20 +203,12 @@ contract User {
     function getAccount(uint _id) public view returns (AccountResponse memory) {
         require(accountExist[_id], "Account not found");
 
-        Account memory a = accounts[_id];
-        require(!a.isDeleted, "Account has been deleted");
+        AccountStruct memory account = accounts[_id];
+        require(!account.isDeleted, "Account has been deleted");
 
-        AccountResponse memory res;
-        res.id = _id;
-        res.name = a.name;
-        res.bio = a.bio;
-        res.headerImageURL = a.headerImageURL;
-        res.avatarImageURL = a.avatarImageURL;
-        res.floorPrice = statsOf[msg.sender].floorPrice;
-        res.totalVolume = statsOf[msg.sender].totalVolume;
-        res.timestamp = a.timestamp;
+        AccountResponse memory a = _parseAccountResponse(_id, account);
 
-        return res;
+        return a;
     }
 
     function getMe() public view returns (MeResponse memory) {
@@ -244,7 +223,7 @@ contract User {
 
         require(existAccount, "Account not found");
 
-        Account memory a = accounts[id];
+        AccountStruct memory a = accounts[id];
         require(!a.isDeleted, "Account has been deleted");
 
         MeResponse memory res;
@@ -254,10 +233,28 @@ contract User {
         res.email = a.email;
         res.headerImageURL = a.headerImageURL;
         res.avatarImageURL = a.avatarImageURL;
-        res.floorPrice = statsOf[msg.sender].floorPrice;
-        res.totalVolume = statsOf[msg.sender].totalVolume;
+        res.floorPrice = productStatsOf[msg.sender].floorPrice;
+        res.totalVolume = productStatsOf[msg.sender].totalVolume;
         res.timestamp = a.timestamp;
 
         return res;
+    }
+
+    function _parseAccountResponse(
+        uint _id,
+        AccountStruct memory _account
+    ) private view returns (AccountResponse memory) {
+        AccountResponse memory a;
+
+        a.id = _id;
+        a.name = _account.name;
+        a.bio = _account.bio;
+        a.headerImageURL = _account.headerImageURL;
+        a.avatarImageURL = _account.avatarImageURL;
+        a.floorPrice = productStatsOf[_account.creater].floorPrice;
+        a.totalVolume = productStatsOf[_account.creater].totalVolume;
+        a.timestamp = _account.timestamp;
+
+        return a;
     }
 }

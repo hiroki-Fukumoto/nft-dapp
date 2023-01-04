@@ -11,8 +11,13 @@ async function main() {
   const user = await User.deploy(fee)
   await user.deployed()
 
+  const ProductStats = await ethers.getContractFactory('ProductStats')
+  const productStats = await ProductStats.deploy(fee)
+  await productStats.deployed()
+
   console.log('Product deployed to:', product.address)
   console.log('User deployed to:', user.address)
+  console.log('ProductStats deployed to:', productStats.address)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

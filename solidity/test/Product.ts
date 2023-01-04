@@ -2,108 +2,226 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 
+const toWei = (num: number) => ethers.utils.parseEther(num.toString())
+
 describe('Product', () => {
-  async function deployProductFixture() {
-    const [owner, otherAccount] = await ethers.getSigners()
-
-    const Product = await ethers.getContractFactory('Product')
-    const contract = await Product.deploy()
-
-    return { contract, owner, otherAccount }
-  }
-
-  const dummyData = {
+  const productDummyData = {
     name: 'product1',
     description: 'description',
     imageURL: 'http://test.png',
     price: 10,
-    stock: 20,
+  }
+  const id = 0
+  let fee = toWei(0.002)
+
+  async function deployProductFixture() {
+    const [owner, otherAccount] = await ethers.getSigners()
+
+    const Product = await ethers.getContractFactory('Product')
+    const contract = await Product.deploy(fee)
+
+    return { contract, owner, otherAccount }
   }
 
-  describe('Get product', () => {
-    describe('List', () => {
-      it('Success', async () => {
-        const { contract } = await loadFixture(deployProductFixture)
-        await contract.createProduct(dummyData)
-        const dummyData2 = dummyData
-        dummyData2.name = 'product2'
-        await contract.createProduct(dummyData)
-        const products = await contract.getProductIDs()
+  describe('Deployment', async () => {
+    it('Should confirm deployer address', async () => {
+      const { contract, owner } = await loadFixture(deployProductFixture)
+      expect(await contract.owner()).to.equal(owner.address)
+    })
 
-        expect(products.length).to.equal(2)
+    it('Should Tax on product', async () => {
+      const { contract } = await loadFixture(deployProductFixture)
+      expect(await contract.fee()).to.equal(fee)
+    })
+  })
+
+  describe('Get', () => {
+    it('Should confirm product list', async () => {
+      const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+      await contract.createProduct(productDummyData, {
+        from: owner.address,
+        value: fee,
       })
+      const products = await contract.getProducts()
+      expect(products).to.have.lengthOf(1)
+    })
+
+    it('Should confirm my product list', async () => {
+      const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+      await contract.createProduct(productDummyData, {
+        from: owner.address,
+        value: fee,
+      })
+      await contract.createProduct(productDummyData, {
+        from: owner.address,
+        value: fee,
+      })
+      await contract.connect(otherAccount).createProduct(productDummyData, {
+        from: otherAccount.address,
+        value: fee,
+      })
+      const products = await contract.getMyProducts()
+      expect(products).to.have.lengthOf(2)
     })
 
     describe('Find', () => {
-      it('Success', async () => {
-        const { contract } = await loadFixture(deployProductFixture)
-        await contract.createProduct(dummyData)
-        const product = await contract.getProduct(0)
-        expect(product.name).to.equal(dummyData.name)
+      it('Should confirm product find', async () => {
+        const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+        await contract.createProduct(productDummyData, {
+          from: owner.address,
+          value: fee,
+        })
+        const product = await contract.getProduct(id)
+        expect(product.name).to.equal('product1')
+        expect(product.description).to.equal('description')
+        expect(product.imageURL).to.equal('http://test.png')
+        expect(product.price).to.equal(10)
       })
-      it('Faild', async () => {
-        const { contract } = await loadFixture(deployProductFixture)
-        await expect(contract.getProduct(1)).to.revertedWith('Product not found')
+
+      it('Should confirm product not found', async () => {
+        const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+        await expect(contract.getProduct(99)).to.be.revertedWith('Product not found')
+      })
+
+      it('Should confirm product has been deleted', async () => {
+        const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+        await contract.createProduct(productDummyData, {
+          from: owner.address,
+          value: fee,
+        })
+        await contract.deleteProduct(id)
+        await expect(contract.getProduct(id)).to.be.revertedWith('Product has been deleted')
       })
     })
   })
 
-  describe('Create product', () => {
-    it('Success', async () => {
-      const { contract } = await loadFixture(deployProductFixture)
-      await contract.createProduct(dummyData)
-      const products = await contract.getProductIDs()
-      expect(products.length).to.equal(1)
+  describe('Creation', () => {
+    it('Should confirm product creation', async () => {
+      const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+      await contract.createProduct(productDummyData, {
+        from: owner.address,
+        value: fee,
+      })
+      const product = await contract.getProduct(id)
+      expect(product.id).to.equal(id)
+      expect(product.name).to.equal('product1')
     })
 
-    it('Failed', async () => {
-      const { contract } = await loadFixture(deployProductFixture)
-      const ps = [
+    it('Should confirm product creation error', async () => {
+      const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+      const requests = [
         {
           name: '',
           description: 'description',
           imageURL: 'http://test.png',
           price: 10,
-          stock: 20,
           expected: 'name cannot be empty',
         },
         {
-          name: 'name',
+          name: 'product1',
           description: '',
           imageURL: 'http://test.png',
           price: 10,
-          stock: 20,
           expected: 'description cannot be empty',
         },
         {
-          name: 'name',
+          name: 'product1',
           description: 'description',
           imageURL: '',
           price: 10,
-          stock: 20,
           expected: 'image URL cannot be empty',
         },
         {
-          name: 'name',
+          name: 'product1',
           description: 'description',
           imageURL: 'http://test.png',
           price: 0,
-          stock: 20,
-          expected: 'price cannot be zero',
-        },
-        {
-          name: 'name',
-          description: 'description',
-          imageURL: 'http://test.png',
-          price: 10,
-          stock: 0,
-          expected: 'stock cannot be zero',
+          expected: 'price cannot be empty',
         },
       ]
 
-      ps.forEach(async (p) => {
-        await expect(contract.createProduct(p)).to.be.revertedWith(p.expected)
+      requests.forEach(async (req) => {
+        await expect(contract.createProduct(req)).to.be.revertedWith(req.expected)
       })
+    })
+  })
+
+  describe('Update', () => {
+    it('Should confirm product update', async () => {
+      const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+      await contract.createProduct(productDummyData, {
+        from: owner.address,
+        value: fee,
+      })
+      const req = {
+        id,
+        name: 'product2',
+        description: 'description2',
+        imageURL: 'http://test2.png',
+        price: 20,
+      }
+      await contract.updateProduct(req)
+      const product = await contract.getProduct(id)
+      expect(product.id).to.equal(id)
+      expect(product.name).to.equal('product2')
+    })
+
+    it('Should confirm product update error', async () => {
+      const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+      await contract.createProduct(productDummyData, {
+        from: owner.address,
+        value: fee,
+      })
+      const requests = [
+        {
+          name: '',
+          description: 'description',
+          imageURL: 'http://test.png',
+          price: 10,
+          expected: 'name cannot be empty',
+        },
+        {
+          name: 'product1',
+          description: '',
+          imageURL: 'http://test.png',
+          price: 10,
+          expected: 'description cannot be empty',
+        },
+        {
+          name: 'product1',
+          description: 'description',
+          imageURL: '',
+          price: 10,
+          expected: 'image URL cannot be empty',
+        },
+        {
+          name: 'product1',
+          description: 'description',
+          imageURL: 'http://test.png',
+          price: 0,
+          expected: 'price cannot be empty',
+        },
+      ]
+
+      requests.forEach(async (req) => {
+        await expect(contract.updateProduct(req)).to.be.revertedWith(req.expected)
+      })
+    })
+
+    it('Should confirm Unauthorize Personal', async () => {
+      const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+      await contract.createProduct(productDummyData, {
+        from: owner.address,
+        value: fee,
+      })
+      const req = {
+        id,
+        name: 'product2',
+        description: 'description2',
+        imageURL: 'http://test2.png',
+        price: 20,
+      }
+      await expect(contract.connect(otherAccount).updateProduct(req)).to.be.revertedWith('Unauthorize Personal')
     })
   })
 })
