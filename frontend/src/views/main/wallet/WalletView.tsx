@@ -1,6 +1,5 @@
-import { CardBody } from '@material-tailwind/react'
-
-import { BaseCard } from '@/components/card/BaseCard'
+import { ErrorMessageAlert } from '@/components/alert/error/ErrorMessageAlert'
+import { BasicCard } from '@/components/card/BasicCard'
 import { MainView } from '@/views/main/MainView'
 import { WalletVM } from '@/views/main/wallet/WalletVM'
 
@@ -9,14 +8,17 @@ export const WalletView = () => {
 
   return (
     <MainView>
-      <BaseCard>
-        <BaseCard>
-          <CardBody>
-            <div>Balance</div>
-            <div>{VM.getBalance()} ETH</div>
-          </CardBody>
-        </BaseCard>
-      </BaseCard>
+      <ErrorMessageAlert
+        show={VM.showErrorAlert}
+        message={VM.errorMessageForAlert}
+        onClose={VM.handleCloseErrorAlert}
+      />
+
+      <div className="w-1/2 mx-auto">
+        <BasicCard headerText="Balance">
+          <div>{VM.balance} ETH</div>
+        </BasicCard>
+      </div>
     </MainView>
   )
 }

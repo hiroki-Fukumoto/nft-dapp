@@ -4,13 +4,18 @@ export type AccountResponse = {
   bio: string
   header_image_url: string
   avatar_image_url: string
-  floor_price: number
-  total_volume: number
   timestamp: string
 }
 
 export type MeResponse = AccountResponse & {
   email: string
+}
+
+export type UserRanking = {
+  id: string
+  rank: number
+  name: string
+  avatar_image_url: string
 }
 
 export type CreateAccountRequest = {

@@ -75,6 +75,7 @@ export const NavBar = () => {
               </MenuHandler>
               <MenuList>
                 <MenuItem onClick={() => handleOnSelectMenu(ROUTE.profile)}>Profile</MenuItem>
+                <MenuItem onClick={() => handleOnSelectMenu(ROUTE.productCreate)}>Create Product</MenuItem>
               </MenuList>
             </Menu>
           </div>

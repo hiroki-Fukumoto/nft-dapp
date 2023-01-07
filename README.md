@@ -53,6 +53,24 @@ Add the Metamask Chrome extension.
 
    The address displayed at this time is the contract address.
 
+   ```
+   Product deployed to: 0xxxxxxxxxxxxxxx
+   User deployed to: 0xxxxxxxxxxxxxxx
+   ```
+
+   Set this address to the ".env" of your frontend project.
+
+   ```bash
+   cd ./frontend
+   cp .env.example .env
+   ```
+
+   ```.env
+   .env
+   REACT_APP_PRODUCT_CONTRACT_ADDRESS={your Product contract address}
+   REACT_APP_USER_CONTRACT_ADDRESS={your User contract address}
+   ```
+
 5. Add the Metamask network.
    Add a network to Metamask with the following contents.
 

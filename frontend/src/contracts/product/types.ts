@@ -1,5 +1,6 @@
 export type ProductResponse = {
   id: string
+  seller_id: string
   name: string
   image_url: string
   description: string
@@ -8,6 +9,7 @@ export type ProductResponse = {
 }
 
 export type CreateProductRequest = {
+  seller_id: string
   name: string
   image_url: string
   description: string

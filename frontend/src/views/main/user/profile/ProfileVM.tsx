@@ -4,12 +4,11 @@ import { useRecoilState } from 'recoil'
 import { CreateAccountRequest, UpdateAccountRequest } from '@/contracts/user/types'
 import { UserABI } from '@/contracts/user/userABI'
 import { accountState } from '@/store/userState'
+import { addressState } from '@/store/walletState'
 
 export const ProfileVM = () => {
-  const contractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
-  const userABI = new UserABI(contractAddress)
-
-  const [account, setAccount] = useRecoilState(accountState)
+  const [walletAddress, setWalletAddress] = useRecoilState(addressState)
+  const [account] = useRecoilState(accountState)
   const [name, setName] = useState('')
   const [bio, setBio] = useState('')
   const [email, setEmail] = useState('')
@@ -21,20 +20,9 @@ export const ProfileVM = () => {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false)
   const [successMessageForAlert, setSuccessMessageForAlert] = useState('')
 
-  // == ABI ==
-  const getMe = () => {
-    return userABI
-      .getMe()
-      .then((res) => {
-        return res
-      })
-      .catch((e: Error) => {
-        throw e
-      })
-  }
+  const userABI = new UserABI(walletAddress)
 
-  // TODO: update
-  const createAccountABI = () => {
+  const createAccount = () => {
     const req: CreateAccountRequest = {
       name,
       bio,
@@ -47,7 +35,9 @@ export const ProfileVM = () => {
     })
   }
 
-  const updateAccountABI = () => {
+  const updateAccount = () => {
+    const userABI = new UserABI(walletAddress)
+
     const req: UpdateAccountRequest = {
       id: account.id,
       name,
@@ -61,12 +51,11 @@ export const ProfileVM = () => {
     })
   }
 
-  // == methods ==
   const handleChangeName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value)
   }
 
-  const handleChangeBio = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeBio = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setBio(event.target.value)
   }
 
@@ -85,7 +74,7 @@ export const ProfileVM = () => {
   const handleSave = () => {
     setErrorMessage('')
     if (account.id == '') {
-      void createAccountABI()
+      void createAccount()
         .then(() => {
           setShowSuccessAlert(true)
           setSuccessMessageForAlert('Created Account')
@@ -94,7 +83,7 @@ export const ProfileVM = () => {
           setErrorMessage(e.message)
         })
     } else {
-      void updateAccountABI()
+      void updateAccount()
         .then(() => {
           setShowSuccessAlert(true)
           setSuccessMessageForAlert('Updated Account')
@@ -115,6 +104,7 @@ export const ProfileVM = () => {
     setShowSuccessAlert(false)
   }
 
+  // == init ==
   useEffect(() => {
     if (account.id != '') {
       setName(account.name)
@@ -125,22 +115,12 @@ export const ProfileVM = () => {
       return
     }
 
-    void getMe()
-      .then((res) => {
-        setAccount(res)
-        setName(res.name)
-        setBio(res.bio)
-        setEmail(res.email)
-        setAvatarImageURL(res.avatar_image_url)
-        setHeaderImageURL(res.header_image_url)
-      })
-      .catch((e: Error) => {
-        if (!e.message.includes('Account not found')) {
-          setErrorMessageForAlert(e.message)
-          setShowErrorAlert(true)
-        }
-      })
-  }, [])
+    setName(account.name)
+    setBio(account.bio)
+    setEmail(account.email)
+    setAvatarImageURL(account.avatar_image_url)
+    setHeaderImageURL(account.header_image_url)
+  }, [account])
 
   return {
     account,

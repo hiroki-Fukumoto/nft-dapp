@@ -1,6 +1,6 @@
 import { CardBody, CardHeader } from '@material-tailwind/react'
 
-import { BaseCard } from '@/components/card/BaseCard'
+import { BasicCard } from '@/components/card/BasicCard'
 import { Product } from '@/views/main/collection/CollectionVM'
 
 interface Props {
@@ -11,7 +11,7 @@ export const ProductCard = (props: Props) => {
   const { product } = props
 
   return (
-    <BaseCard>
+    <BasicCard>
       <div className="cursor-pointer relative group">
         <CardHeader floated={false} className="h-30">
           <img src={product.image_url} />
@@ -24,6 +24,6 @@ export const ProductCard = (props: Props) => {
           Add to Cart
         </div>
       </div>
-    </BaseCard>
+    </BasicCard>
   )
 }

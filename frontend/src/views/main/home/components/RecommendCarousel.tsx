@@ -3,16 +3,10 @@ import { useState, useRef, useEffect } from 'react'
 
 import { RoundedIconButton } from '@/components/button/RoundedIconButton'
 import { iconStyle } from '@/components/icon/Icon'
-
-export type RecommendProduct = {
-  id: string
-  name: string
-  floor: number
-  image_url: string
-}
+import { ProductResponse } from '@/contracts/product/types'
 
 interface Props {
-  products: RecommendProduct[]
+  products: ProductResponse[]
 }
 
 export const RecommendCarousel = (props: Props) => {

@@ -1,41 +1,42 @@
 import userContract from 'solidity/artifacts/contracts/User.sol/User.json'
-import { User as TUser } from 'solidity/types/web3-v1-contracts/User'
-import Web3 from 'web3'
+import { User as UserContract } from 'solidity/types/web3-v1-contracts/User'
 import { AbiItem } from 'web3-utils'
 
-import { CreateAccountRequest, AccountResponse, MeResponse, UpdateAccountRequest } from '@/contracts/user/types'
+import {
+  CreateAccountRequest,
+  UserRanking,
+  AccountResponse,
+  MeResponse,
+  UpdateAccountRequest,
+} from '@/contracts/user/types'
 import { Web3Factory } from '@/web3/index'
 
-export class UserABI {
-  web3Factory: Web3Factory
-  contractAddress: string
-  web3: Web3
-  account: string
-  contract: () => TUser
+let contractAddress = process.env.REACT_APP_USER_CONTRACT_ADDRESS
+if (typeof contractAddress === 'undefined') {
+  console.error('User contract address is undefined')
+}
+contractAddress = contractAddress as string
 
-  constructor(address: string) {
-    this.web3Factory = new Web3Factory()
-    this.contractAddress = address
-    this.web3 = this.web3Factory.getWeb3()
-    this.account = this.web3.eth.defaultAccount as string
+const web3Factory = new Web3Factory()
+const web3 = web3Factory.getWeb3()
+
+export class UserABI {
+  walletAddress: string
+  contract: () => UserContract
+
+  constructor(walletAddress: string) {
+    this.walletAddress = walletAddress
     this.contract = () => {
-      return new this.web3.eth.Contract(userContract.abi as AbiItem[], this.contractAddress) as unknown as TUser
+      return new web3.eth.Contract(userContract.abi as AbiItem[], contractAddress) as unknown as UserContract
     }
   }
 
   async createAccount(req: CreateAccountRequest) {
-    // TODO
-    if (!this.account) {
-      await this.web3Factory.getDefaultAccount().then((res) => {
-        this.account = res
-      })
-    }
-
-    const fee = this.web3.utils.toWei('0.002', 'ether')
+    const fee = web3.utils.toWei('0.002', 'ether')
 
     return this.contract()
       .methods.createAccount([req.name, req.bio, req.email, req.header_image_url, req.avatar_image_url])
-      .send({ from: this.account, value: fee })
+      .send({ from: this.walletAddress, value: fee })
       .catch((e: Error) => {
         throw e
       })
@@ -44,7 +45,7 @@ export class UserABI {
   updateAccount(req: UpdateAccountRequest) {
     return this.contract()
       .methods.updateAccount([req.id, req.name, req.bio, req.email, req.header_image_url, req.avatar_image_url])
-      .send({ from: this.account })
+      .send({ from: this.walletAddress })
       .catch((e: Error) => {
         throw e
       })
@@ -53,7 +54,7 @@ export class UserABI {
   getMe(): Promise<MeResponse> {
     return this.contract()
       .methods.getMe()
-      .call({ from: this.account })
+      .call({ from: this.walletAddress })
       .then((res) => {
         const m: MeResponse = {
           id: res[0],
@@ -62,18 +63,36 @@ export class UserABI {
           email: res[3],
           header_image_url: res[4],
           avatar_image_url: res[5],
-          floor_price: Number(res[6]),
-          total_volume: Number(res[7]),
-          timestamp: res[8],
+          timestamp: res[6],
         }
         return m
       })
   }
 
-  async getAccounts(): Promise<AccountResponse[]> {
-    return await this.contract()
+  getAccount(id: string): Promise<AccountResponse> {
+    return this.contract()
+      .methods.getAccount(id)
+      .call({ from: this.walletAddress })
+      .then((res) => {
+        const a: AccountResponse = {
+          id: res[0],
+          name: res[1],
+          bio: res[2],
+          header_image_url: res[3],
+          avatar_image_url: res[4],
+          timestamp: res[5],
+        }
+        return a
+      })
+      .catch((e: Error) => {
+        throw e
+      })
+  }
+
+  getAccounts(): Promise<AccountResponse[]> {
+    return this.contract()
       .methods.getAccounts()
-      .call({ from: this.account })
+      .call({ from: this.walletAddress })
       .then((res) => {
         const accounts: AccountResponse[] = []
         res.forEach((r) => {
@@ -83,13 +102,33 @@ export class UserABI {
             bio: r[2],
             header_image_url: r[3],
             avatar_image_url: r[4],
-            floor_price: Number(r[5]),
-            total_volume: Number(r[6]),
-            timestamp: r[7],
+            timestamp: r[5],
           }
           accounts.push(a)
         })
         return accounts
+      })
+      .catch((e: Error) => {
+        throw e
+      })
+  }
+
+  getUserRankings(): Promise<UserRanking[]> {
+    return this.contract()
+      .methods.getRankings()
+      .call({ from: this.walletAddress })
+      .then((res) => {
+        const rankings: UserRanking[] = []
+        res.forEach((r) => {
+          const a: UserRanking = {
+            id: r[0],
+            rank: Number(r[1]),
+            name: r[2],
+            avatar_image_url: r[3],
+          }
+          rankings.push(a)
+        })
+        return rankings
       })
       .catch((e: Error) => {
         throw e

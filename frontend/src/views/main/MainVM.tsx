@@ -3,19 +3,29 @@ import { useRecoilState } from 'recoil'
 
 import { UserABI } from '@/contracts/user/userABI'
 import { accountState } from '@/store/userState'
+import { addressState } from '@/store/walletState'
 import { Web3Factory } from '@/web3/index'
 
 export const MainVM = () => {
-  const contractAddress = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
-  const userABI = new UserABI(contractAddress)
-
-  const web3Factory = new Web3Factory()
-
-  const [account, setAccount] = useRecoilState(accountState)
+  const [walletAddress, setWalletAddress] = useRecoilState(addressState)
+  const [, setAccount] = useRecoilState(accountState)
   const [errorMessageForAlert, setErrorMessageForAlert] = useState('')
   const [showErrorAlert, setShowErrorAlert] = useState(false)
 
-  // == ABI ==
+  const userABI = new UserABI(walletAddress)
+
+  const getWalletAddress = () => {
+    const web3Factory = new Web3Factory()
+    return web3Factory
+      .getAccount()
+      .then((res) => {
+        return res
+      })
+      .catch((e: Error) => {
+        throw e
+      })
+  }
+
   const getMe = () => {
     return userABI
       .getMe()
@@ -31,26 +41,31 @@ export const MainVM = () => {
     setShowErrorAlert(false)
   }
 
+  // == init ==
   useEffect(() => {
-    // TODO
-    void web3Factory
-      .setDefaultAccount()
-      .then(() => {
-        void getMe()
-          .then((res) => {
-            setAccount(res)
-          })
-          .catch((e: Error) => {
-            if (!e.message.includes('Account not found')) {
-              setErrorMessageForAlert(e.message)
-              setShowErrorAlert(true)
-            }
-          })
-      })
-      .catch((e: Error) => {
-        setErrorMessageForAlert(e.message)
-        setShowErrorAlert(true)
-      })
+    function init() {
+      getWalletAddress()
+        .then((res) => {
+          setWalletAddress(res)
+
+          void getMe()
+            .then((res) => {
+              setAccount(res)
+            })
+            .catch((e: Error) => {
+              if (!e.message.includes('Account not found')) {
+                setErrorMessageForAlert(e.message)
+                setShowErrorAlert(true)
+              }
+            })
+        })
+        .catch((e: Error) => {
+          console.error(e.message)
+          setErrorMessageForAlert(e.message)
+          setShowErrorAlert(true)
+        })
+    }
+    void init()
   }, [])
 
   return {

@@ -1,26 +1,16 @@
 import Web3 from 'web3'
 const web3 = new Web3('http://localhost:8545')
 
-export class Web3Factory {
-  async setDefaultAccount(): Promise<void> {
-    if (typeof window.ethereum === 'undefined') {
-      throw new Error('Please install Metamask.')
-    }
-    await web3.eth
-      .getAccounts()
-      .then((x) => {
-        web3.eth.defaultAccount = x[0]
-      })
-      .catch((e: Error) => {
-        throw e
-      })
-  }
+if (typeof window.ethereum === 'undefined') {
+  throw new Error('Please install Metamask.')
+}
 
-  getDefaultAccount() {
+export class Web3Factory {
+  getAccount() {
     return web3.eth
       .getAccounts()
       .then((x) => {
-        return (web3.eth.defaultAccount = x[0])
+        return x[0]
       })
       .catch((e: Error) => {
         throw e

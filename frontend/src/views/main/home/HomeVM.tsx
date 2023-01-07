@@ -1,41 +1,29 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useRecoilState } from 'recoil'
 
 import { ProductABI } from '@/contracts/product/productABI'
-import { CreateProductRequest, ProductResponse } from '@/contracts/product/types'
+import { ProductResponse } from '@/contracts/product/types'
+import { UserRanking } from '@/contracts/user/types'
+import { UserABI } from '@/contracts/user/userABI'
 import { ROUTE } from '@/RouteConfig'
-import { RecommendProduct } from '@/views/main/home/components/RecommendCarousel'
-// TODO
-export type UserRanking = {
-  rank: number
-  name: string
-  avatar_url: string
-  floor_price: number
-  total_volume: number
-}
+import { addressState } from '@/store/walletState'
 
 export const HomeVM = () => {
-  const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
-  const productABI = new ProductABI(contractAddress)
-
   const navigate = useNavigate()
 
-  const [products, setProducts] = useState([] as ProductResponse[])
-  const [showCreateProductModal, setShowCreateProductModal] = useState(false)
-  const [newProductName, setNewProductName] = useState('')
-  const [newProductImageURL, setNewProductImageURL] = useState('')
-  const [newProductDescription, setNewProductDescription] = useState('')
-  const [newProductPrice, setNewProductPrice] = useState(0)
-  const [newProductErrorMessage, setNewProductErrorMessage] = useState('')
+  const [walletAddress, setWalletAddress] = useRecoilState(addressState)
   const [errorMessageForAlert, setErrorMessageForAlert] = useState('')
   const [showErrorAlert, setShowErrorAlert] = useState(false)
-  const [recommendProducts, setRecommendProducts] = useState([] as RecommendProduct[])
+  const [recommendProducts, setRecommendProducts] = useState([] as ProductResponse[])
   const [userRankings, setUserRankings] = useState([] as UserRanking[])
 
-  // == ABI ==
-  const getProductsABI = () => {
+  const userABI = new UserABI(walletAddress)
+  const productABI = new ProductABI(walletAddress)
+
+  const getRecommendProducts = () => {
     return productABI
-      .getProducts()
+      .getRecommendProducts()
       .then((res) => {
         return res
       })
@@ -44,61 +32,14 @@ export const HomeVM = () => {
       })
   }
 
-  const createProductABI = () => {
-    const req: CreateProductRequest = {
-      name: newProductName,
-      image_url: newProductImageURL,
-      description: newProductDescription,
-      price: newProductPrice,
-    }
-    return productABI.createProduct(req)
-  }
-
-  // == methods ==
-  const handleCreateProduct = () => {
-    setShowCreateProductModal(true)
-  }
-
-  const handleCloseProductCreateModal = () => {
-    setShowCreateProductModal(false)
-    setNewProductName('')
-    setNewProductImageURL('')
-    setNewProductDescription('')
-    setNewProductPrice(0)
-  }
-
-  const handleChangeNewProductName = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewProductName(event.target.value)
-  }
-
-  const handleChangeNewProductImageURL = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewProductImageURL(event.target.value)
-  }
-
-  const handleChangeNewProductDescription = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNewProductDescription(event.target.value)
-  }
-
-  const handleChangeNewProductPrice = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewProductPrice(Number(event.target.value))
-  }
-
-  const handleCreateNewProduct = () => {
-    setNewProductErrorMessage('')
-    void createProductABI()
-      .then(async () => {
-        await getProductsABI()
-          .then((p) => {
-            setProducts(p)
-            setShowCreateProductModal(false)
-          })
-          .catch((e: Error) => {
-            setErrorMessageForAlert(e.message)
-            setShowErrorAlert(true)
-          })
+  const getUserRankings = () => {
+    return userABI
+      .getUserRankings()
+      .then((res) => {
+        return res
       })
       .catch((e: Error) => {
-        setNewProductErrorMessage(e.message)
+        throw e
       })
   }
 
@@ -107,175 +48,39 @@ export const HomeVM = () => {
     setShowErrorAlert(false)
   }
 
-  const handleSelectUserRanking = () => {
-    navigate(ROUTE.collection)
-  }
-
-  // TODO
-  const getRecommendProducts = () => {
-    const p: RecommendProduct[] = [
-      {
-        id: '1',
-        name: 'product1',
-        floor: 0.1,
-        image_url: 'https://placeimg.com/640/480/animals/sepia',
-      },
-      {
-        id: '2',
-        name: 'product2',
-        floor: 0.2,
-        image_url: 'https://placeimg.com/640/480/animals',
-      },
-      {
-        id: '3',
-        name: 'product3',
-        floor: 0.3,
-        image_url: 'https://placeimg.com/640/480/arch',
-      },
-      {
-        id: '4',
-        name: 'product4',
-        floor: 0.4,
-        image_url: 'https://placeimg.com/640/480/nature',
-      },
-      {
-        id: '5',
-        name: 'product5',
-        floor: 0.5,
-        image_url: 'https://placeimg.com/640/480/people',
-      },
-      {
-        id: '6',
-        name: 'product6',
-        floor: 0.6,
-        image_url: 'https://placeimg.com/640/480/tech',
-      },
-      {
-        id: '7',
-        name: 'product7',
-        floor: 0.7,
-        image_url: 'https://placeimg.com/640/480/grayscale',
-      },
-    ]
-    setRecommendProducts(p)
-  }
-
-  // TODO
-  const getUserRankings = () => {
-    const users: UserRanking[] = [
-      {
-        rank: 1,
-        name: 'user1',
-        avatar_url: 'https://placeimg.com/640/480/people',
-        floor_price: 0.321,
-        total_volume: 100,
-      },
-      {
-        rank: 2,
-        name: 'user2',
-        avatar_url: 'https://placeimg.com/640/480/people',
-        floor_price: 0.321,
-        total_volume: 100,
-      },
-      {
-        rank: 3,
-        name: 'user3',
-        avatar_url: 'https://placeimg.com/640/480/people',
-        floor_price: 0.321,
-        total_volume: 100,
-      },
-      {
-        rank: 4,
-        name: 'user4',
-        avatar_url: 'https://placeimg.com/640/480/people',
-        floor_price: 0.321,
-        total_volume: 100,
-      },
-      {
-        rank: 5,
-        name: 'user5',
-        avatar_url: 'https://placeimg.com/640/480/people',
-        floor_price: 0.321,
-        total_volume: 100,
-      },
-      {
-        rank: 6,
-        name: 'user6',
-        avatar_url: 'https://placeimg.com/640/480/people',
-        floor_price: 0.321,
-        total_volume: 100,
-      },
-      {
-        rank: 7,
-        name: 'user7',
-        avatar_url: 'https://placeimg.com/640/480/people',
-        floor_price: 0.321,
-        total_volume: 100,
-      },
-      {
-        rank: 8,
-        name: 'user8',
-        avatar_url: 'https://placeimg.com/640/480/people',
-        floor_price: 0.321,
-        total_volume: 100,
-      },
-      {
-        rank: 9,
-        name: 'user9',
-        avatar_url: 'https://placeimg.com/640/480/people',
-        floor_price: 0.321,
-        total_volume: 100,
-      },
-      {
-        rank: 10,
-        name: 'user10',
-        avatar_url: 'https://placeimg.com/640/480/people',
-        floor_price: 0.321,
-        total_volume: 100,
-      },
-    ]
-
-    setUserRankings(users)
+  const handleSelectUserRanking = (id: string) => {
+    navigate(`${ROUTE.collection}/${id}`)
   }
 
   // == init ==
   useEffect(() => {
-    async function init() {
-      await getProductsABI()
-        .then((p) => {
-          setProducts(p)
-        })
-        .catch((e: Error) => {
-          setErrorMessageForAlert(e.message)
-          setShowErrorAlert(true)
-        })
+    if (walletAddress == '') return
+    void getRecommendProducts()
+      .then((res) => {
+        setRecommendProducts(res)
+      })
+      .catch((e: Error) => {
+        console.error(e.message)
+        setErrorMessageForAlert(e.message)
+        setShowErrorAlert(true)
+      })
 
-      // TODO
-      getRecommendProducts()
-      getUserRankings()
-    }
-    void init()
-  }, [])
+    void getUserRankings()
+      .then((res) => {
+        setUserRankings(res)
+      })
+      .catch((e: Error) => {
+        console.error(e.message)
+        setErrorMessageForAlert(e.message)
+        setShowErrorAlert(true)
+      })
+  }, [walletAddress])
 
   return {
-    products,
-    showCreateProductModal,
-    newProductName,
-    newProductImageURL,
-    newProductDescription,
-    newProductPrice,
-    newProductErrorMessage,
     errorMessageForAlert,
     recommendProducts,
     showErrorAlert,
     userRankings,
-    handleCreateProduct,
-    handleCloseProductCreateModal,
-    handleChangeNewProductName,
-    handleChangeNewProductImageURL,
-    handleChangeNewProductDescription,
-    handleChangeNewProductPrice,
-    handleCreateNewProduct,
     handleCloseErrorAlert,
     handleSelectUserRanking,
   }

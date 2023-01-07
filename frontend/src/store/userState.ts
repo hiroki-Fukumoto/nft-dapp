@@ -12,8 +12,6 @@ export const accountState = atom<MeResponse>({
     email: '',
     header_image_url: '',
     avatar_image_url: '',
-    floor_price: 0,
-    total_volume: 0,
     timestamp: '',
   },
 })

@@ -19,3 +19,21 @@ root.render(
     </CookiesProvider>
   </React.StrictMode>
 )
+
+// TODO
+// const migrate = async () => {
+//   const userABI = new UserABI('0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512')
+
+//   await userABI
+//     .getAccounts()
+//     .then((res) => {
+//       if (res.length == 0) {
+//         createDummyAccounts()
+//         createDummyProducts()
+//       }
+//     })
+//     .catch((e: Error) => {
+//       console.log('migrate error')
+//     })
+// }
+// void migrate()
