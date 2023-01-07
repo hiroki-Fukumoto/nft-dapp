@@ -1,75 +1,81 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-import "./ProductStats.sol";
+struct AccountStruct {
+    uint id;
+    address creater;
+    string name;
+    string bio;
+    string email;
+    string headerImageURL;
+    string avatarImageURL;
+    bool isDeleted;
+    uint timestamp;
+}
 
-contract User is ProductStats {
+struct CreateAccountRequest {
+    string name;
+    string bio;
+    string email;
+    string headerImageURL;
+    string avatarImageURL;
+}
+
+struct UpdateAccountRequest {
+    uint id;
+    string name;
+    string bio;
+    string email;
+    string headerImageURL;
+    string avatarImageURL;
+}
+
+struct AccountResponse {
+    uint id;
+    string name;
+    string bio;
+    string headerImageURL;
+    string avatarImageURL;
+    uint timestamp;
+}
+
+struct MeResponse {
+    uint id;
+    string name;
+    string bio;
+    string email;
+    string headerImageURL;
+    string avatarImageURL;
+    uint timestamp;
+}
+
+struct RankingResponse {
+    uint id;
+    uint8 rank;
+    string name;
+    string avatarImageURL;
+}
+
+contract User {
     address public owner;
     uint public fee;
-    AccountStruct[] accounts;
+    AccountStruct[] public accounts;
 
     constructor(uint _fee) {
         owner = msg.sender;
         fee = _fee;
     }
 
-    // == struct ==
-    struct AccountStruct {
-        address creater;
-        string name;
-        string bio;
-        string email;
-        string headerImageURL;
-        string avatarImageURL;
-        bool isDeleted;
-        uint timestamp;
-    }
-
-    struct CreateAccountRequest {
-        string name;
-        string bio;
-        string email;
-        string headerImageURL;
-        string avatarImageURL;
-    }
-
-    struct UpdateAccountRequest {
-        uint id;
-        string name;
-        string bio;
-        string email;
-        string headerImageURL;
-        string avatarImageURL;
-    }
-
-    struct AccountResponse {
-        uint id;
-        string name;
-        string bio;
-        string headerImageURL;
-        string avatarImageURL;
-        uint8 floorPrice;
-        uint8 totalVolume;
-        uint timestamp;
-    }
-
-    struct MeResponse {
-        uint id;
-        string name;
-        string bio;
-        string email;
-        string headerImageURL;
-        string avatarImageURL;
-        uint8 floorPrice;
-        uint8 totalVolume;
-        uint timestamp;
-    }
-
     // == mapping ==
-    mapping(uint => address) public ownerOf;
+    mapping(uint => address) public userOwnerOf;
     mapping(uint => bool) accountExist;
 
     // == modifier ==
+    modifier onlyUserOwner() {
+        require(msg.sender == owner, "Unauthorize Personal");
+        _;
+    }
+
     modifier validateCreateAccount(CreateAccountRequest memory _req) {
         require(msg.value >= fee, "Insufficient fund");
         require(bytes(_req.name).length > 0, "name cannot be empty");
@@ -89,7 +95,7 @@ contract User is ProductStats {
         bool existAccount;
         bool existName;
         for (uint i = 0; i < accounts.length; i++) {
-            if (ownerOf[i] == msg.sender) {
+            if (userOwnerOf[i] == msg.sender) {
                 existAccount = true;
             }
             if (
@@ -108,10 +114,6 @@ contract User is ProductStats {
     }
 
     modifier validateUpdateAccount(UpdateAccountRequest memory _req) {
-        require(
-            accounts[_req.id].creater == msg.sender,
-            "Unauthorize Personal"
-        );
         require(accountExist[_req.id], "Account not found");
         require(bytes(_req.name).length > 0, "name cannot be empty");
         require(bytes(_req.bio).length > 0, "bio cannot be empty");
@@ -134,6 +136,8 @@ contract User is ProductStats {
         CreateAccountRequest memory _req
     ) public payable validateCreateAccount(_req) returns (bool) {
         AccountStruct memory account;
+        uint _id = accounts.length;
+        account.id = _id;
         account.creater = msg.sender;
         account.name = _req.name;
         account.bio = _req.bio;
@@ -143,19 +147,15 @@ contract User is ProductStats {
         account.timestamp = block.timestamp;
         accounts.push(account);
 
-        productStatsOf[msg.sender].floorPrice = 0;
-        productStatsOf[msg.sender].totalVolume = 0;
-
-        uint id = accounts.length - 1;
-        accountExist[id] = true;
-        ownerOf[id] = msg.sender;
+        accountExist[_id] = true;
+        userOwnerOf[_id] = msg.sender;
 
         return true;
     }
 
     function updateAccount(
         UpdateAccountRequest memory _req
-    ) public validateUpdateAccount(_req) returns (bool) {
+    ) public onlyUserOwner validateUpdateAccount(_req) returns (bool) {
         AccountStruct memory account = accounts[_req.id];
         account.name = _req.name;
         account.bio = _req.bio;
@@ -167,8 +167,7 @@ contract User is ProductStats {
         return true;
     }
 
-    function deleteAccount(uint _id) public returns (bool) {
-        require(ownerOf[_id] == msg.sender, "Unauthorize Personal");
+    function deleteAccount(uint _id) public onlyUserOwner returns (bool) {
         require(accountExist[_id], "Account not found");
 
         AccountStruct memory account = accounts[_id];
@@ -215,7 +214,7 @@ contract User is ProductStats {
         bool existAccount;
         uint id;
         for (uint i = 0; i < accounts.length; i++) {
-            if (ownerOf[i] == msg.sender) {
+            if (userOwnerOf[i] == msg.sender) {
                 existAccount = true;
                 id = i;
             }
@@ -233,8 +232,6 @@ contract User is ProductStats {
         res.email = a.email;
         res.headerImageURL = a.headerImageURL;
         res.avatarImageURL = a.avatarImageURL;
-        res.floorPrice = productStatsOf[msg.sender].floorPrice;
-        res.totalVolume = productStatsOf[msg.sender].totalVolume;
         res.timestamp = a.timestamp;
 
         return res;
@@ -243,7 +240,7 @@ contract User is ProductStats {
     function _parseAccountResponse(
         uint _id,
         AccountStruct memory _account
-    ) private view returns (AccountResponse memory) {
+    ) private pure returns (AccountResponse memory) {
         AccountResponse memory a;
 
         a.id = _id;
@@ -251,10 +248,34 @@ contract User is ProductStats {
         a.bio = _account.bio;
         a.headerImageURL = _account.headerImageURL;
         a.avatarImageURL = _account.avatarImageURL;
-        a.floorPrice = productStatsOf[_account.creater].floorPrice;
-        a.totalVolume = productStatsOf[_account.creater].totalVolume;
         a.timestamp = _account.timestamp;
 
         return a;
+    }
+
+    // TODO
+    function getRankings() public view returns (RankingResponse[] memory) {
+        uint limit = 10;
+        if (accounts.length < 10) {
+            limit = accounts.length;
+        }
+
+        RankingResponse[] memory results = new RankingResponse[](limit);
+
+        uint counter = 0;
+        for (uint i = 0; i < limit; i++) {
+            if (!accounts[i].isDeleted) {
+                AccountStruct memory account = accounts[i];
+                RankingResponse memory r;
+                r.id = i;
+                r.rank = uint8(i++);
+                r.name = account.name;
+                r.avatarImageURL = account.avatarImageURL;
+                results[counter] = r;
+                counter++;
+            }
+        }
+
+        return results;
     }
 }

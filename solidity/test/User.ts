@@ -5,6 +5,9 @@ import { ethers } from 'hardhat'
 const toWei = (num: number) => ethers.utils.parseEther(num.toString())
 
 describe('User', async () => {
+  const id = 0
+  const fee = toWei(0.002)
+
   const userDummyData = {
     name: 'account1',
     bio: 'bio',
@@ -12,8 +15,6 @@ describe('User', async () => {
     headerImageURL: 'http://test.png',
     avatarImageURL: 'http://test.png',
   }
-  const id = 0
-  let fee = toWei(0.002)
 
   async function deployUserFixture() {
     const [owner, otherAccount] = await ethers.getSigners()
@@ -59,8 +60,6 @@ describe('User', async () => {
         expect(account.bio).to.equal('bio')
         expect(account.headerImageURL).to.equal('http://test.png')
         expect(account.avatarImageURL).to.equal('http://test.png')
-        expect(account.floorPrice).to.equal(0)
-        expect(account.totalVolume).to.equal(0)
       })
 
       it('Should confirm account not found', async () => {

@@ -5,14 +5,16 @@ import { ethers } from 'hardhat'
 const toWei = (num: number) => ethers.utils.parseEther(num.toString())
 
 describe('Product', () => {
+  const id = 0
+  const fee = toWei(0.002)
+
   const productDummyData = {
+    sellerID: id,
     name: 'product1',
-    description: 'description',
     imageURL: 'http://test.png',
+    description: 'description',
     price: 10,
   }
-  const id = 0
-  let fee = toWei(0.002)
 
   async function deployProductFixture() {
     const [owner, otherAccount] = await ethers.getSigners()
@@ -46,22 +48,39 @@ describe('Product', () => {
       expect(products).to.have.lengthOf(1)
     })
 
-    it('Should confirm my product list', async () => {
+    it('Should confirm recommend product list', async () => {
       const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
-      await contract.createProduct(productDummyData, {
-        from: owner.address,
-        value: fee,
-      })
-      await contract.createProduct(productDummyData, {
-        from: owner.address,
-        value: fee,
-      })
-      await contract.connect(otherAccount).createProduct(productDummyData, {
-        from: otherAccount.address,
-        value: fee,
-      })
-      const products = await contract.getMyProducts()
-      expect(products).to.have.lengthOf(2)
+      for (let index = 0; index < 11; index++) {
+        await contract.createProduct(productDummyData, {
+          from: owner.address,
+          value: fee,
+        })
+      }
+
+      const products = await contract.getRecommendProducts()
+      expect(products).to.have.lengthOf(10)
+    })
+
+    it('Should confirm product list by seller', async () => {
+      const { contract, owner, otherAccount } = await loadFixture(deployProductFixture)
+      for (let index = 0; index < 10; index++) {
+        if (index % 2 == 0) {
+          const req = { ...productDummyData }
+          req.sellerID = 1
+          await contract.connect(otherAccount).createProduct(req, {
+            from: otherAccount.address,
+            value: fee,
+          })
+        } else {
+          await contract.createProduct(productDummyData, {
+            from: owner.address,
+            value: fee,
+          })
+        }
+      }
+
+      const products = await contract.getProductsBySeller(id)
+      expect(products).to.have.lengthOf(5)
     })
 
     describe('Find', () => {

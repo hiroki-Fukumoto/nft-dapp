@@ -1,9 +1,45 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-import "./ProductStats.sol";
+struct ProductStruct {
+    uint id;
+    address seller;
+    uint sellerID;
+    string name;
+    string imageURL;
+    string description;
+    uint8 price; // TODO: float
+    bool isDeleted;
+    uint timestamp;
+}
 
-contract Product is ProductStats {
+struct CreateProductRequest {
+    uint sellerID;
+    string name;
+    string imageURL;
+    string description;
+    uint8 price;
+}
+
+struct UpdateProductRequest {
+    uint id;
+    string name;
+    string imageURL;
+    string description;
+    uint8 price;
+}
+
+struct ProductResponse {
+    uint id;
+    uint sellerID;
+    string name;
+    string imageURL;
+    string description;
+    uint8 price;
+    uint timestamp;
+}
+
+contract Product {
     address public owner;
     uint public fee;
     ProductStruct[] products;
@@ -13,46 +49,16 @@ contract Product is ProductStats {
         fee = _fee;
     }
 
-    // == struct ==
-    struct ProductStruct {
-        address seller;
-        string name;
-        string imageURL;
-        string description;
-        uint8 price;
-        bool isDeleted;
-        uint timestamp;
-    }
-
-    struct CreateProductRequest {
-        string name;
-        string imageURL;
-        string description;
-        uint8 price;
-    }
-
-    struct UpdateProductRequest {
-        uint id;
-        string name;
-        string imageURL;
-        string description;
-        uint8 price;
-    }
-
-    struct ProductResponse {
-        uint id;
-        string name;
-        string imageURL;
-        string description;
-        uint8 price;
-        uint timestamp;
-    }
-
     // == mapping ==
-    mapping(uint => address) public ownerOf;
+    mapping(uint => address) public produtOwnerOf;
     mapping(uint => bool) productExist;
 
     // == modifier ==
+    modifier onlyProductOwner() {
+        require(msg.sender == owner, "Unauthorize Personal");
+        _;
+    }
+
     modifier validateCreate(CreateProductRequest memory _req) {
         require(msg.value >= fee, "Insufficient fund");
         require(bytes(_req.name).length > 0, "name cannot be empty");
@@ -67,7 +73,6 @@ contract Product is ProductStats {
     }
 
     modifier validateUpdate(UpdateProductRequest memory _req) {
-        require(products[_req.id].seller == msg.sender, "Unauthorize Personal");
         require(bytes(_req.name).length > 0, "name cannot be empty");
         require(
             bytes(_req.description).length > 0,
@@ -104,10 +109,12 @@ contract Product is ProductStats {
         return results;
     }
 
-    function getMyProducts() public view returns (ProductResponse[] memory) {
+    function getProductsBySeller(
+        uint _sellerID
+    ) public view returns (ProductResponse[] memory) {
         uint activeProducts = 0;
         for (uint i = 0; i < products.length; i++) {
-            if (products[i].seller == msg.sender && !products[i].isDeleted) {
+            if (products[i].sellerID == _sellerID && !products[i].isDeleted) {
                 activeProducts += 1;
             }
         }
@@ -117,7 +124,7 @@ contract Product is ProductStats {
 
         uint counter = 0;
         for (uint i = 0; i < products.length; i++) {
-            if (products[i].seller == msg.sender && !products[i].isDeleted) {
+            if (products[i].sellerID == _sellerID && !products[i].isDeleted) {
                 ProductStruct memory product = products[i];
                 ProductResponse memory p = _parseProductResponse(i, product);
                 results[counter] = p;
@@ -139,11 +146,47 @@ contract Product is ProductStats {
         return res;
     }
 
+    // TODO
+    function getRecommendProducts()
+        public
+        view
+        returns (ProductResponse[] memory)
+    {
+        uint limit = 10;
+        if (products.length < 10) {
+            limit = products.length;
+        }
+        ProductResponse[] memory results = new ProductResponse[](limit);
+
+        uint counter = 0;
+        for (uint i = 0; i < limit; i++) {
+            if (!products[i].isDeleted) {
+                ProductStruct memory product = products[i];
+                ProductResponse memory p;
+                p.id = i;
+                p.sellerID = product.sellerID;
+                p.name = product.name;
+                p.imageURL = product.imageURL;
+                p.description = product.description;
+                p.price = product.price;
+                p.timestamp = product.timestamp;
+                results[counter] = p;
+                counter++;
+            }
+        }
+
+        return results;
+    }
+
     function createProduct(
         CreateProductRequest memory _req
     ) public payable validateCreate(_req) returns (bool) {
         ProductStruct memory product;
+        uint _id = products.length;
+
+        product.id = _id;
         product.seller = msg.sender;
+        product.sellerID = _req.sellerID;
         product.name = _req.name;
         product.imageURL = _req.imageURL;
         product.description = _req.description;
@@ -152,24 +195,15 @@ contract Product is ProductStats {
         product.timestamp = block.timestamp;
         products.push(product);
 
-        uint id = products.length - 1;
-        productExist[id] = true;
-        ownerOf[id] = msg.sender;
-
-        productStatsOf[msg.sender].productCount++;
-        if (productStatsOf[msg.sender].floorPrice > _req.price) {
-            productStatsOf[msg.sender].floorPrice = _req.price;
-        }
-        productStatsOf[msg.sender].totalVolume =
-            productStatsOf[msg.sender].totalVolume +
-            _req.price;
+        productExist[_id] = true;
+        produtOwnerOf[_id] = msg.sender;
 
         return true;
     }
 
     function updateProduct(
         UpdateProductRequest memory _req
-    ) public validateUpdate(_req) returns (bool) {
+    ) public onlyProductOwner validateUpdate(_req) returns (bool) {
         ProductStruct memory product;
         product.name = _req.name;
         product.imageURL = _req.imageURL;
@@ -177,19 +211,10 @@ contract Product is ProductStats {
         product.price = _req.price;
         products[_req.id] = product;
 
-        if (productStatsOf[msg.sender].floorPrice > _req.price) {
-            productStatsOf[msg.sender].floorPrice = _req.price;
-        }
-        productStatsOf[msg.sender].totalVolume =
-            productStatsOf[msg.sender].totalVolume +
-            _req.price -
-            product.price;
-
         return true;
     }
 
-    function deleteProduct(uint _id) public returns (bool) {
-        require(ownerOf[_id] == msg.sender, "Unauthorize Personal");
+    function deleteProduct(uint _id) public onlyProductOwner returns (bool) {
         require(productExist[_id], "Product has been deleted");
 
         ProductStruct memory product = products[_id];
@@ -206,6 +231,7 @@ contract Product is ProductStats {
         ProductResponse memory p;
 
         p.id = _id;
+        p.sellerID = _product.sellerID;
         p.name = _product.name;
         p.imageURL = _product.imageURL;
         p.description = _product.description;
